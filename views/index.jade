@@ -1,0 +1,8 @@
+extends layout
+
+block content
+	- var language = "Jade"
+	if language == "Jade"
+		a(href = 'login') login here #{isAuthenticated}
+	else
+		p Not awesome
