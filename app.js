@@ -15,7 +15,7 @@ var app = express();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'ejs');
+app.set('view engine', 'jade');
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(__dirname + '/public/favicon.ico'));
@@ -42,8 +42,26 @@ app.get('/', function (req, res) {
     });
 });
 
+var isAuthenticated = function (req, res, next) {
+    return req.isAuthenticated() ? next() : res.redirect('/');
+};
+
+app.get('/hello', isAuthenticated, function (req, res) {
+    // console.log(req.isAuthenticated());
+    // if(req.isAuthenticated()){
+        res.render('hello', {
+            isAuthenticated: req.isAuthenticated(),
+            user: req.user
+        });
+
+    //     return;
+    // }
+
+    // res.redirect('/');
+});
+
 app.post('/login', passport.authenticate('local'), function (req, res) {
-    res.redirect('/');
+    res.redirect('hello');
 });
 
 passport.use(new passportLocal.Strategy(function (username, password, done) {
@@ -84,6 +102,7 @@ app.get('/login', function (req, res) {
 
 app.get('/logout', function (req, res) {
     req.logout();
+    console.log(req.isAuthenticated());
     res.redirect('/');
 });
 
