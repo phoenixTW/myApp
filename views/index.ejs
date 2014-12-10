@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Index Page</title>
+</head>
+<body>
+	<% if (!isAuthenticated) { %>
+		<a href="/login">Log In here</a>
+	<% } else { %>
+		Hello, <%= user.name %>
+		<br>
+		<a href="/logout">logout</a>
+	<% } %>
+</body>
+</html>

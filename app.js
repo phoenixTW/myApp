@@ -15,7 +15,7 @@ var app = express();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'jade');
+app.set('view engine', 'ejs');
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(__dirname + '/public/favicon.ico'));
@@ -24,8 +24,6 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-app.use('/', routes);
-app.use('/users', users);
 
 app.use(expressSession({
     secret: process.env.SESSION_SECRET || 'secret',
@@ -44,22 +42,27 @@ app.get('/', function (req, res) {
     });
 });
 
+app.post('/login', passport.authenticate('local'), function (req, res) {
+    res.redirect('/');
+});
+
 passport.use(new passportLocal.Strategy(function (username, password, done) {
     //Pretend this is use a real database
     if(username == password) {
         done(null, {id: username, name: username});
     }
-    else
-        done(null, null);
+    else{
+        done(null, false);
+    }
 }));
 
 passport.serializeUser(function (user, done) {
-    done(user.id);
+    done(null, user.id);
 });
 
 passport.deserializeUser(function (id, done) {
     //Query Database or cache here
-    done({id: id, name: id});    
+    done(null, {id: id, name: id});    
 });
 
 
@@ -76,14 +79,13 @@ passport.deserializeUser(function (id, done) {
 // });
 app.get('/login', function (req, res) {
     res.render('login');
-})
-app.post('/login', passport.authenticate('local'), function (req, res) {
-    res.redirect('hello');
 });
 
-app.get('/hello', function (req, res) {
-    res.render('hello');
-})
+
+app.get('/logout', function (req, res) {
+    req.logout();
+    res.redirect('/');
+});
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -96,25 +98,25 @@ app.use(function(req, res, next) {
 
 // development error handler
 // will print stacktrace
-if (app.get('env') === 'development') {
-    app.use(function(err, req, res, next) {
-        res.status(err.status || 500);
-        res.render('error', {
-            message: err.message,
-            error: err
-        });
-    });
-}
+// if (app.get('env') === 'development') {
+//     app.use(function(err, req, res, next) {
+//         res.status(err.status || 500);
+//         res.render('error', {
+//             message: err.message,
+//             error: err
+//         });
+//     });
+// }
 
-// production error handler
-// no stacktraces leaked to user
-app.use(function(err, req, res, next) {
-    res.status(err.status || 500);
-    res.render('error', {
-        message: err.message,
-        error: {}
-    });
-});
+// // production error handler
+// // no stacktraces leaked to user
+// app.use(function(err, req, res, next) {
+//     res.status(err.status || 500);
+//     res.render('error', {
+//         message: err.message,
+//         error: {}
+//     });
+// });
 
 
 module.exports = app;
